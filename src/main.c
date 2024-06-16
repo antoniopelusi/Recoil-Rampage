@@ -14,7 +14,7 @@
 #define SW 1920
 #define SH 1200
 
-#define MAX_ENEMIES 100
+#define MAX_ENEMIES 10
 #define MAX_BULLETS MAX_ENEMIES + 1
 #define RANDOM_LEVEL 29
 #define BULLET_SPEED 1
@@ -26,8 +26,7 @@
 #define BULLET_SIZE_Y 12
 #define RECOIL 15
 #define WALK_LIMIT 150
-#define BLOCK_SIZE 50
-#define HITBOX_SIZE 60
+#define BLOCK_SIZE 60
 #define MAX_SOUNDS 10
 
 #define GRASSGREEN \
@@ -38,6 +37,7 @@ int level;
 
 int nEnemies;
 int nBullets;
+float enemyBulletSpeed;
 
 enum
 {
@@ -81,7 +81,7 @@ typedef struct Bullet
 
 typedef struct Map
 {
-    bool isTree;
+    bool isStone;
     float angle;
 } Map;
 
@@ -106,6 +106,7 @@ Image bulletImage;
 Image enemyBulletImage;
 Image grassImage;
 Image treeImage;
+Image stoneImage;
 
 Texture2D playerTexture;
 Texture2D enemyTexture;
@@ -113,10 +114,12 @@ Texture2D bulletTexture;
 Texture2D enemyBulletTexture;
 Texture2D grassTexture;
 Texture2D treeTexture;
+Texture2D stoneTexture;
 
 bool frontPage = true;
 bool gameOver = true;
 bool pause = false;
+bool newLevel = false;
 
 int isAllDead;
 
@@ -153,6 +156,8 @@ int main()
     LoadRes();
 
     InitGame();
+
+    InitMap();
 
     SetTargetFPS(FPS);
 
@@ -191,6 +196,7 @@ void LoadRes()
     enemyBulletImage = LoadImage("res/enemyBullet.png");
     grassImage = LoadImage("res/grass.png");
     treeImage = LoadImage("res/tree.png");
+    stoneImage = LoadImage("res/stone.png");
 
     playerTexture = LoadTextureFromImage(playerImage);
     enemyTexture = LoadTextureFromImage(enemyImage);
@@ -198,6 +204,7 @@ void LoadRes()
     enemyBulletTexture = LoadTextureFromImage(enemyBulletImage);
     grassTexture = LoadTextureFromImage(grassImage);
     treeTexture = LoadTextureFromImage(treeImage);
+    stoneTexture = LoadTextureFromImage(stoneImage);
 }
 
 void UnloadRes()
@@ -210,6 +217,7 @@ void UnloadRes()
     UnloadImage(enemyBulletImage);
     UnloadImage(grassImage);
     UnloadImage(treeImage);
+    UnloadImage(stoneImage);
 
     UnloadTexture(playerTexture);
     UnloadTexture(enemyTexture);
@@ -217,6 +225,7 @@ void UnloadRes()
     UnloadTexture(enemyBulletTexture);
     UnloadTexture(grassTexture);
     UnloadTexture(treeTexture);
+    UnloadTexture(stoneTexture);
 }
 
 /* ---------------------------------------------------------------------------------------- */
@@ -229,7 +238,7 @@ void InitMap()
     {
         for (int y = 0; y < SH / BLOCK_SIZE; y++)
         {
-            map[x][y].isTree = GetRandomValue(0, RANDOM_LEVEL);
+            map[x][y].isStone = GetRandomValue(0, RANDOM_LEVEL);
 
             map[x][y].angle = angles[GetRandomValue(0, 3)];
         }
@@ -244,8 +253,8 @@ void InitPlayer()
     player.direction.x = NORD;
     player.direction.y = NORD;
 
-    player.size.x = HITBOX_SIZE;
-    player.size.y = HITBOX_SIZE;
+    player.size.x = BLOCK_SIZE;
+    player.size.y = BLOCK_SIZE;
 
     player.rotation = NORD;
 
@@ -260,8 +269,8 @@ void InitEnemy(int i)
     enemy[i].direction.x = NORD;
     enemy[i].direction.y = NORD;
 
-    enemy[i].size.x = HITBOX_SIZE;
-    enemy[i].size.y = HITBOX_SIZE;
+    enemy[i].size.x = BLOCK_SIZE;
+    enemy[i].size.y = BLOCK_SIZE;
 
     enemy[i].rotation = NORD;
 
@@ -303,7 +312,7 @@ void InitEnemyBullet(int i)
 
     bullet[i].rotation = NORD;
 
-    bullet[i].speed = ENEMY_BULLET_SPEED;
+    bullet[i].speed = enemyBulletSpeed;
 
     bullet[i].isActive = false;
 
@@ -317,8 +326,8 @@ void InitGame()
 
     nEnemies = 1;
     nBullets = 2;
+    enemyBulletSpeed = ENEMY_BULLET_SPEED;
 
-    InitMap();
     InitPlayer();
     InitBullet();
 
@@ -337,62 +346,72 @@ void UpdateGame()
 {
     if (!gameOver)
     {
-        if (IsKeyPressed('P'))
-            pause = !pause;
-
-        if (!pause)
+        if (IsKeyPressed(KEY_SPACE))
         {
-            isAllDead = 1;
+            newLevel = false;
+        }
 
-            UpdatePlayer();
-
-            for (int i = 0; i < nEnemies; i++)
+        if (!newLevel)
+        {
+            if (IsKeyPressed(KEY_P))
             {
-                if (enemy[i].isAlive)
-                {
-                    isAllDead = 0;
-
-                    UpdateEnemy(i);
-                }
+                pause = !pause;
             }
 
-            for (int i = 0; i < nBullets; i++)
+            if (!pause)
             {
-                if (bullet[i].isActive)
-                {
-                    UpdateBullet(i);
-                }
-            }
+                isAllDead = 1;
 
-            if (isAllDead)
-            {
-                level++;
-
-                if (nEnemies <= MAX_ENEMIES - 1 && nBullets <= MAX_BULLETS - 1)
-                {
-                    nEnemies++;
-                    nBullets++;
-                }
-                else
-                {
-                    frontPage = true;
-                    gameOver = true;
-                }
+                UpdatePlayer();
 
                 for (int i = 0; i < nEnemies; i++)
                 {
-                    player.recoil = RECOIL;
+                    if (enemy[i].isAlive)
+                    {
+                        isAllDead = 0;
 
-                    InitBullet();
-                    InitEnemy(i);
-                    InitEnemyBullet(i);
+                        UpdateEnemy(i);
+                    }
+                }
+
+                for (int i = 0; i < nBullets; i++)
+                {
+                    if (bullet[i].isActive)
+                    {
+                        UpdateBullet(i);
+                    }
+                }
+
+                if (isAllDead)
+                {
+                    level++;
+
+                    if (nEnemies <= MAX_ENEMIES - 1)
+                    {
+                        nEnemies++;
+                        nBullets++;
+                    }
+                    else
+                    {
+                        enemyBulletSpeed += 0.01f;
+                    }
+
+                    for (int i = 0; i < nEnemies; i++)
+                    {
+                        player.recoil = RECOIL;
+
+                        InitBullet();
+                        InitEnemy(i);
+                        InitEnemyBullet(i);
+                    }
+                    newLevel = true;
                 }
             }
         }
     }
     else
     {
-        if (IsKeyPressed(KEY_ENTER))
+        if (IsKeyPressed(KEY_SPACE))
         {
             InitGame();
 
@@ -410,105 +429,128 @@ void DrawGame()
 {
     BeginDrawing();
 
-    ClearBackground(GRASSGREEN);
+    ClearBackground(BLACK);
 
-    if (!gameOver)
+    for (int x = 0; x < SW / BLOCK_SIZE; x++)
     {
-        if (!pause)
+        for (int y = 0; y < SH / BLOCK_SIZE; y++)
         {
-            for (int x = 0; x <= SW / BLOCK_SIZE; x++)
+            DrawTexturePro(grassTexture,
+                           (Rectangle){0, 0, BLOCK_SIZE, BLOCK_SIZE},
+                           (Rectangle){x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE},
+                           (Vector2){BLOCK_SIZE / 2, BLOCK_SIZE / 2},
+                           map[x][y].angle,
+                           RAYWHITE);
+
+            if (x == 0 || x == (SW / BLOCK_SIZE) - 1 || y == 0 || y == (SH / BLOCK_SIZE) - 1)
             {
-                for (int y = 0; y < SH / BLOCK_SIZE; y++)
+                DrawTexturePro(treeTexture,
+                               (Rectangle){0, 0, BLOCK_SIZE, BLOCK_SIZE},
+                               (Rectangle){x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE},
+                               (Vector2){BLOCK_SIZE / 2, BLOCK_SIZE / 2},
+                               map[x][y].angle,
+                               RAYWHITE);
+            }
+            else
+            {
+                if (!map[x][y].isStone)
                 {
-                    DrawTexturePro(grassTexture,
+                    DrawTexturePro(stoneTexture,
                                    (Rectangle){0, 0, BLOCK_SIZE, BLOCK_SIZE},
                                    (Rectangle){x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE},
                                    (Vector2){BLOCK_SIZE / 2, BLOCK_SIZE / 2},
                                    map[x][y].angle,
                                    RAYWHITE);
-
-                    if (!map[x][y].isTree || x == 0 || x == (SW / BLOCK_SIZE) || y == 0 || y == (SH / BLOCK_SIZE) - 1)
-                    {
-                        DrawTexturePro(treeTexture,
-                                       (Rectangle){0, 0, BLOCK_SIZE, BLOCK_SIZE},
-                                       (Rectangle){x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE},
-                                       (Vector2){BLOCK_SIZE / 2, BLOCK_SIZE / 2},
-                                       map[x][y].angle,
-                                       RAYWHITE);
-                    }
                 }
             }
+        }
+    }
 
-            for (int i = 0; i < nBullets; i++)
+    if (!gameOver)
+    {
+        if (!newLevel)
+        {
+            if (!pause)
             {
-                if (bullet[i].isActive)
+
+                for (int i = 0; i < nBullets; i++)
                 {
-                    if (i == nBullets - 1)
+                    if (bullet[i].isActive)
                     {
-                        DrawTexturePro(bulletTexture,
-                                       (Rectangle){0, 0, bullet[i].size.x, bullet[i].size.y},
-                                       (Rectangle){bullet[i].position.x, bullet[i].position.y, bullet[i].size.x, bullet[i].size.y},
-                                       (Vector2){bullet[i].size.x / 2, bullet[i].size.y / 2},
-                                       bullet[i].rotation + EAST,
-                                       RAYWHITE);
+                        if (i == nBullets - 1)
+                        {
+                            DrawTexturePro(bulletTexture,
+                                           (Rectangle){0, 0, bullet[i].size.x, bullet[i].size.y},
+                                           (Rectangle){bullet[i].position.x, bullet[i].position.y, bullet[i].size.x, bullet[i].size.y},
+                                           (Vector2){bullet[i].size.x / 2, bullet[i].size.y / 2},
+                                           bullet[i].rotation + EAST,
+                                           RAYWHITE);
+                        }
+                        else
+                        {
+                            DrawTexturePro(enemyBulletTexture,
+                                           (Rectangle){0, 0, bullet[i].size.x, bullet[i].size.y},
+                                           (Rectangle){bullet[i].position.x, bullet[i].position.y, bullet[i].size.x, bullet[i].size.y},
+                                           (Vector2){bullet[i].size.x / 2, bullet[i].size.y / 2},
+                                           bullet[i].rotation + EAST,
+                                           RAYWHITE);
+                        }
                     }
-                    else
+                }
+
+                DrawTexturePro(playerTexture,
+                               (Rectangle){0, 0, player.size.x, player.size.y},
+                               (Rectangle){player.position.x, player.position.y, player.size.x, player.size.y},
+                               (Vector2){player.size.x / 2, player.size.y / 2},
+                               player.rotation + EAST,
+                               RAYWHITE);
+
+                for (int i = 0; i < nEnemies; i++)
+                {
+                    if (enemy[i].isAlive)
                     {
-                        DrawTexturePro(enemyBulletTexture,
-                                       (Rectangle){0, 0, bullet[i].size.x, bullet[i].size.y},
-                                       (Rectangle){bullet[i].position.x, bullet[i].position.y, bullet[i].size.x, bullet[i].size.y},
-                                       (Vector2){bullet[i].size.x / 2, bullet[i].size.y / 2},
-                                       bullet[i].rotation + EAST,
+                        DrawTexturePro(enemyTexture,
+                                       (Rectangle){0, 0, enemy[i].size.x, enemy[i].size.y},
+                                       (Rectangle){enemy[i].position.x, enemy[i].position.y, enemy[i].size.x, enemy[i].size.y},
+                                       (Vector2){enemy[i].size.x / 2, enemy[i].size.y / 2},
+                                       enemy[i].rotation + EAST,
                                        RAYWHITE);
                     }
                 }
+
+                DrawText(TextFormat("Level: %d", level), 80, 80, 30, RAYWHITE);
+                DrawText(TextFormat("Score: %d", score), 80, 120, 30, RAYWHITE);
             }
-
-            DrawTexturePro(playerTexture,
-                           (Rectangle){0, 0, player.size.x, player.size.y},
-                           (Rectangle){player.position.x, player.position.y, player.size.x, player.size.y},
-                           (Vector2){player.size.x / 2, player.size.y / 2},
-                           player.rotation + EAST,
-                           RAYWHITE);
-
-            for (int i = 0; i < nEnemies; i++)
+            else
             {
-                if (enemy[i].isAlive)
-                {
-                    DrawTexturePro(enemyTexture,
-                                   (Rectangle){0, 0, enemy[i].size.x, enemy[i].size.y},
-                                   (Rectangle){enemy[i].position.x, enemy[i].position.y, enemy[i].size.x, enemy[i].size.y},
-                                   (Vector2){enemy[i].size.x / 2, enemy[i].size.y / 2},
-                                   enemy[i].rotation + EAST,
-                                   RAYWHITE);
-                }
-            }
+                const char *pauseText = "Pause";
+                DrawText(pauseText, (SW / 2) - MeasureText(pauseText, 48) / 2, (SH / 2) - 30, 48, BLACK);
 
-            DrawText(TextFormat("Level: %d", level), 80, 80, 30, RAYWHITE);
-            DrawText(TextFormat("Score: %d", score), 80, 120, 30, RAYWHITE);
+                const char *unpauseText = "press p to unpause";
+                DrawText(unpauseText, (SW / 2) - MeasureText(unpauseText, 48) / 2, (SH / 2) + 30, 48, RAYWHITE);
+            }
         }
         else
         {
-            const char *pauseText = "pause";
-            DrawText(pauseText, (SW / 2) - MeasureText(pauseText, 48) / 2, (SH / 2) - 30, 48, RAYWHITE);
+            DrawText(TextFormat("Level %d Complete", level - 1), (SW / 2) - MeasureText(TextFormat("Level %d Complete", level), 48) / 2, (SH / 2) - 30, 48, DARKBLUE);
 
-            const char *unpauseText = "press p to unpause";
+            const char *unpauseText = "press space to continue";
             DrawText(unpauseText, (SW / 2) - MeasureText(unpauseText, 48) / 2, (SH / 2) + 30, 48, RAYWHITE);
         }
     }
     else if (frontPage)
     {
-        DrawText(title, (SW / 2) - MeasureText(title, 48) / 2, (SH / 2) - 30, 48, RAYWHITE);
+        DrawText(title, (SW / 2) - MeasureText(title, 48) / 2, (SH / 2) - 30, 48, GOLD);
 
-        const char *startText = "press enter to start";
+        const char *startText = "press space to start";
         DrawText(TextFormat(startText), (SW / 2) - MeasureText(startText, 48) / 2, (SH / 2) + 30, 48, RAYWHITE);
     }
     else
     {
         const char *gameOverText = "Game Over";
-        DrawText(gameOverText, (SW / 2) - MeasureText(gameOverText, 48) / 2, (SH / 2) - 80, 48, RAYWHITE);
+        DrawText(gameOverText, (SW / 2) - MeasureText(gameOverText, 48) / 2, (SH / 2) - 80, 48, MAROON);
 
-        const char *restartText = "press enter to restart";
+        const char *restartText = "press space to restart";
         DrawText(restartText, (SW / 2) - MeasureText(restartText, 48) / 2, (SH / 2) - 40, 48, RAYWHITE);
 
         const char *lastScoreText = TextFormat("Score: %d", score);
