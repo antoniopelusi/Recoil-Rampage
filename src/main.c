@@ -29,9 +29,6 @@
 #define BLOCK_SIZE 60
 #define MAX_SOUNDS 10
 
-#define GRASSGREEN \
-    CLITERAL(Color) { 76, 175, 80, 255 }
-
 int score;
 int level;
 
@@ -149,6 +146,8 @@ int main()
 {
     InitWindow(SW, SH, "Recoil Rampage");
 
+    ToggleFullscreen();
+
     SetWindowIcon(playerImage);
 
     InitAudioDevice();
@@ -234,9 +233,9 @@ void UnloadRes()
 
 void InitMap()
 {
-    for (int x = 0; x < SW / BLOCK_SIZE; x++)
+    for (int x = 0; x < (SW / BLOCK_SIZE); x++)
     {
-        for (int y = 0; y < SH / BLOCK_SIZE; y++)
+        for (int y = 0; y < (SH / BLOCK_SIZE); y++)
         {
             map[x][y].isStone = GetRandomValue(0, RANDOM_LEVEL);
 
@@ -431,13 +430,13 @@ void DrawGame()
 
     ClearBackground(BLACK);
 
-    for (int x = 0; x < SW / BLOCK_SIZE; x++)
+    for (int x = 0; x < (SW / BLOCK_SIZE); x++)
     {
-        for (int y = 0; y < SH / BLOCK_SIZE; y++)
+        for (int y = 0; y < (SH / BLOCK_SIZE); y++)
         {
             DrawTexturePro(grassTexture,
                            (Rectangle){0, 0, BLOCK_SIZE, BLOCK_SIZE},
-                           (Rectangle){x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE},
+                           (Rectangle){(x * BLOCK_SIZE) + (BLOCK_SIZE / 2), (y * BLOCK_SIZE) + (BLOCK_SIZE / 2), BLOCK_SIZE, BLOCK_SIZE},
                            (Vector2){BLOCK_SIZE / 2, BLOCK_SIZE / 2},
                            map[x][y].angle,
                            RAYWHITE);
@@ -446,7 +445,7 @@ void DrawGame()
             {
                 DrawTexturePro(treeTexture,
                                (Rectangle){0, 0, BLOCK_SIZE, BLOCK_SIZE},
-                               (Rectangle){x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE},
+                               (Rectangle){(x * BLOCK_SIZE) + (BLOCK_SIZE / 2), (y * BLOCK_SIZE) + (BLOCK_SIZE / 2), BLOCK_SIZE, BLOCK_SIZE},
                                (Vector2){BLOCK_SIZE / 2, BLOCK_SIZE / 2},
                                map[x][y].angle,
                                RAYWHITE);
@@ -457,7 +456,7 @@ void DrawGame()
                 {
                     DrawTexturePro(stoneTexture,
                                    (Rectangle){0, 0, BLOCK_SIZE, BLOCK_SIZE},
-                                   (Rectangle){x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE},
+                                   (Rectangle){(x * BLOCK_SIZE) + (BLOCK_SIZE / 2), (y * BLOCK_SIZE) + (BLOCK_SIZE / 2), BLOCK_SIZE, BLOCK_SIZE},
                                    (Vector2){BLOCK_SIZE / 2, BLOCK_SIZE / 2},
                                    map[x][y].angle,
                                    RAYWHITE);
@@ -472,7 +471,6 @@ void DrawGame()
         {
             if (!pause)
             {
-
                 for (int i = 0; i < nBullets; i++)
                 {
                     if (bullet[i].isActive)
