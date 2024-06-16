@@ -610,7 +610,6 @@ void UpdateEnemy(int i)
 
 void UpdateBullet(int i)
 {
-
     if (i == nBullets - 1) // player
     {
         if ((bullet[i].position.x == player.position.x) && (bullet[i].position.y == player.position.y))
@@ -626,21 +625,21 @@ void UpdateBullet(int i)
                 currentSound = 0;
         }
 
-        for (int i = 0; i < nEnemies; i++)
+        for (int j = 0; j < nEnemies; j++)
         {
             if (CheckCollisionPointRec(
                     (Vector2){bullet[nBullets - 1].position.x, bullet[nBullets - 1].position.y},
-                    (Rectangle){enemy[i].position.x - (enemy[i].size.x / 2), enemy[i].position.y - (enemy[i].size.y / 2), enemy[i].size.x, enemy[i].size.y}) &&
-                enemy[i].isAlive)
+                    (Rectangle){enemy[j].position.x - (enemy[j].size.x / 2), enemy[j].position.y - (enemy[j].size.y / 2), enemy[j].size.x, enemy[j].size.y}) &&
+                enemy[j].isAlive)
             {
-                enemy[i].isAlive = false;
+                enemy[j].isAlive = false;
                 score++;
             }
         }
 
         if (bullet[i].ttl == 5)
         {
-            InitBullet(i);
+            InitBullet();
 
             player.recoil = RECOIL;
         }
@@ -688,14 +687,11 @@ void UpdateBullet(int i)
                 currentSound = 0;
         }
 
-        for (int i = 0; i < nEnemies; i++)
+        if (CheckCollisionPointRec(
+                (Vector2){bullet[i].position.x, bullet[i].position.y},
+                (Rectangle){player.position.x - (player.size.x / 2), player.position.y - (player.size.y / 2), player.size.x, player.size.y}))
         {
-            if (CheckCollisionPointRec(
-                    (Vector2){bullet[i].position.x, bullet[i].position.y},
-                    (Rectangle){player.position.x - (player.size.x / 2), player.position.y - (player.size.y / 2), player.size.x, player.size.y}))
-            {
-                gameOver = true;
-            }
+            gameOver = true;
         }
 
         if (bullet[i].ttl == 5)
