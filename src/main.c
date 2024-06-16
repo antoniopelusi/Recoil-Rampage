@@ -649,12 +649,12 @@ void UpdateBullet(int i)
             player.direction.x = cos((bullet[i].rotation + EAST) * -DEG2RAD) * player.recoil;
             player.direction.y = sin((bullet[i].rotation + EAST) * DEG2RAD) * player.recoil;
 
-            if (!(player.position.x + (player.size.x / 2) - player.direction.x < WALK_LIMIT || player.position.x + (player.size.x / 2) - player.direction.x > SW - WALK_LIMIT))
+            if (!(player.position.x - player.direction.x < WALK_LIMIT || player.position.x - player.direction.x > SW - WALK_LIMIT))
             {
                 player.position.x -= player.direction.x;
             }
 
-            if (!(player.position.y + (player.size.y / 2) - player.direction.y < WALK_LIMIT || player.position.y + (player.size.y / 2) - player.direction.y > SH - WALK_LIMIT))
+            if (!(player.position.y - player.direction.y < WALK_LIMIT || player.position.y - player.direction.y > SH - WALK_LIMIT))
             {
                 player.position.y -= player.direction.y;
             }
