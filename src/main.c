@@ -10,6 +10,15 @@
 #include <emscripten/emscripten.h>
 #endif
 
+#include "bullet_png.h"
+#include "enemy_png.h"
+#include "enemyBullet_png.h"
+#include "grass_png.h"
+#include "player_png.h"
+#include "shotgun_wav.h"
+#include "stone_png.h"
+#include "tree_png.h"
+
 #define FPS 60
 
 #define MAX_ENEMIES 10
@@ -185,7 +194,8 @@ int main()
 
 void LoadRes()
 {
-    soundArray[0] = LoadSound("res/shotgun.mp3");
+    Wave shotgunWave = LoadWaveFromMemory(".wav", res_shotgun_wav, res_shotgun_wav_len);
+    soundArray[0] = LoadSoundFromWave(shotgunWave);
 
     for (int i = 1; i < MAX_SOUNDS; i++)
     {
@@ -193,13 +203,13 @@ void LoadRes()
     }
     currentSound = 0;
 
-    playerImage = LoadImage("res/player.png");
-    enemyImage = LoadImage("res/enemy.png");
-    bulletImage = LoadImage("res/bullet.png");
-    enemyBulletImage = LoadImage("res/enemyBullet.png");
-    grassImage = LoadImage("res/grass.png");
-    treeImage = LoadImage("res/tree.png");
-    stoneImage = LoadImage("res/stone.png");
+    playerImage = LoadImageFromMemory(".png", res_player_png, res_player_png_len);
+    enemyImage = LoadImageFromMemory(".png", res_enemy_png, res_enemy_png_len);
+    bulletImage = LoadImageFromMemory(".png", res_bullet_png, res_bullet_png_len);
+    enemyBulletImage = LoadImageFromMemory(".png", res_enemyBullet_png, res_enemyBullet_png_len);
+    grassImage = LoadImageFromMemory(".png", res_grass_png, res_grass_png_len);
+    treeImage = LoadImageFromMemory(".png", res_tree_png, res_tree_png_len);
+    stoneImage = LoadImageFromMemory(".png", res_stone_png, res_stone_png_len);
 
     playerTexture = LoadTextureFromImage(playerImage);
     enemyTexture = LoadTextureFromImage(enemyImage);

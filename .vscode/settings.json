@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "raylib.h": "c",
+        "math.h": "c",
+        "stdlib.h": "c",
+        "grass_png.h": "c"
+    }
+}
