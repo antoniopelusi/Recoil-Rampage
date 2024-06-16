@@ -11,8 +11,6 @@
 #endif
 
 #define FPS 60
-#define SW 1920
-#define SH 1200
 
 #define MAX_ENEMIES 10
 #define MAX_BULLETS MAX_ENEMIES + 1
@@ -28,6 +26,9 @@
 #define WALK_LIMIT 150
 #define BLOCK_SIZE 60
 #define MAX_SOUNDS 10
+
+int SW;
+int SH;
 
 int score;
 int level;
@@ -92,7 +93,7 @@ Enemy enemy[MAX_ENEMIES];
  */
 Bullet bullet[MAX_BULLETS];
 
-Map map[SW / BLOCK_SIZE][SH / BLOCK_SIZE];
+Map map[BLOCK_SIZE][BLOCK_SIZE];
 
 Sound shotgunSound;
 Sound soundArray[MAX_SOUNDS] = {0};
@@ -144,7 +145,10 @@ void UpdateBullet(int i);
 
 int main()
 {
-    InitWindow(SW, SH, "Recoil Rampage");
+    InitWindow(0, 0, "Recoil Rampage");
+
+    SW = GetMonitorWidth(GetCurrentMonitor());
+    SH = GetMonitorHeight(GetCurrentMonitor());
 
     ToggleFullscreen();
 
