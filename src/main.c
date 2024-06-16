@@ -424,7 +424,7 @@ void UpdateGame()
     }
     else
     {
-        if (IsKeyPressed(KEY_SPACE))
+        if (IsKeyPressed(KEY_ENTER))
         {
             InitGame();
 
@@ -554,7 +554,7 @@ void DrawGame()
     {
         DrawText(title, (SW / 2) - MeasureText(title, 48) / 2, (SH / 2) - 30, 48, GOLD);
 
-        const char *startText = "press space to start";
+        const char *startText = "press enter to start";
         DrawText(TextFormat(startText), (SW / 2) - MeasureText(startText, 48) / 2, (SH / 2) + 30, 48, RAYWHITE);
     }
     else
@@ -562,7 +562,7 @@ void DrawGame()
         const char *gameOverText = "Game Over";
         DrawText(gameOverText, (SW / 2) - MeasureText(gameOverText, 48) / 2, (SH / 2) - 80, 48, MAROON);
 
-        const char *restartText = "press space to restart";
+        const char *restartText = "press enter to restart";
         DrawText(restartText, (SW / 2) - MeasureText(restartText, 48) / 2, (SH / 2) - 40, 48, RAYWHITE);
 
         const char *lastScoreText = TextFormat("Score: %d", score);
