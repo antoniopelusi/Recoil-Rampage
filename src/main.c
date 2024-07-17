@@ -36,8 +36,8 @@
 #define BLOCK_SIZE 60
 #define MAX_SOUNDS 10
 
-int SW;
-int SH;
+int SW = 1920;
+int SH = 1080;
 
 int score;
 int level;
@@ -154,10 +154,7 @@ void UpdateBullet(int i);
 
 int main()
 {
-    InitWindow(0, 0, "Recoil Rampage");
-
-    SW = GetMonitorWidth(GetCurrentMonitor());
-    SH = GetMonitorHeight(GetCurrentMonitor());
+    InitWindow(SW, SH, "Recoil Rampage");
 
     ToggleFullscreen();
 
